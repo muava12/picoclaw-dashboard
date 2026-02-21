@@ -286,6 +286,7 @@ class ServiceControl {
 
 // File Explorer
 class FileExplorer {
+    constructor() {
         this.currentPath = '';
         this.filesListEl = document.getElementById('files-list');
         this.breadcrumbEl = document.getElementById('breadcrumb');
