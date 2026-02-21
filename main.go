@@ -41,6 +41,7 @@ func main() {
 	}()
 
 	// Serve static files (embedded)
+	// Note: In Go 1.22+, specific patterns like GET /api/logs take precedence over / pattern
 	http.Handle("/", http.FileServer(http.FS(staticFiles)))
 
 	// Get Tailscale IP or use default

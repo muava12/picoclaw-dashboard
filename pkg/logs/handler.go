@@ -21,9 +21,27 @@ func NewHandler(service *Service) *Handler {
 
 // RegisterRoutes регистрирует роуты для API логов
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/logs", h.getLogs)
-	mux.HandleFunc("GET /api/logs/units", h.getUnits)
-	mux.HandleFunc("GET /api/logs/stream", h.streamLogs)
+	mux.HandleFunc("/api/logs", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			h.getLogs(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+	mux.HandleFunc("/api/logs/units", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			h.getUnits(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+	mux.HandleFunc("/api/logs/stream", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			h.streamLogs(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
 }
 
 func (h *Handler) getLogs(w http.ResponseWriter, r *http.Request) {
