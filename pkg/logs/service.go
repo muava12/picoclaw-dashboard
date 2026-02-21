@@ -156,10 +156,10 @@ func (s *Service) parseLogs(output string, filter LogFilter) []LogEntry {
 		}
 	}
 
-	// Сортируем по времени (новые первые)
+	// Сортируем по времени (старые первые)
 	for i := 0; i < len(entries); i++ {
 		for j := i + 1; j < len(entries); j++ {
-			if entries[i].Timestamp.Before(entries[j].Timestamp) {
+			if entries[i].Timestamp.After(entries[j].Timestamp) {
 				entries[i], entries[j] = entries[j], entries[i]
 			}
 		}
