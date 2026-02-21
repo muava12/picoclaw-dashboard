@@ -23,6 +23,20 @@ func main() {
 	// Setup API routes
 	api.SetupRoutes(hub)
 
+	// Broadcast metrics every 15 seconds
+	go func() {
+		ticker := time.NewTicker(15 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			health, err := api.GetHealth()
+			if err != nil {
+				log.Printf("⚠️  Error getting health: %v", err)
+				continue
+			}
+			hub.Broadcast(health)
+		}
+	}()
+
 	// Serve static files (embedded)
 	http.Handle("/", http.FileServer(http.FS(staticFiles)))
 
@@ -35,6 +49,7 @@ func main() {
 	log.Printf("🔌 WebSocket: %s/ws", addr)
 	log.Printf("💻 Runtime: %s/%s", runtime.GOOS, runtime.GOARCH)
 	log.Printf("🌐 Tailscale enabled - connecting from VPN")
+	log.Printf("📡 Broadcasting metrics every 5 seconds")
 
 	server := &http.Server{
 		Addr:         addr,

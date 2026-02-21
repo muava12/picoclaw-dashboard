@@ -57,7 +57,7 @@ type RuntimeInfo struct {
 	Arch      string `json:"arch"`
 }
 
-func getHealth() (HealthResponse, error) {
+func GetHealth() (HealthResponse, error) {
 	// CPU usage
 	cpuPercent, err := cpu.Percent(0, false)
 	if err != nil {
