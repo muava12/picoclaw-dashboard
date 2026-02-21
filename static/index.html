@@ -16,6 +16,7 @@
             <nav class="nav-tabs">
                 <button class="nav-tab active" data-tab="dashboard">📊 Dashboard</button>
                 <button class="nav-tab" data-tab="files">📁 Files</button>
+                <button class="nav-tab" data-tab="logs">📝 Logs</button>
             </nav>
         </header>
 
@@ -128,6 +129,58 @@
 
                 <div class="files-list" id="files-list">
                     <div class="loading">Loading files...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Tab -->
+        <div class="tab-content" id="tab-logs">
+            <div class="logs-section">
+                <div class="logs-controls">
+                    <select id="levelFilter">
+                        <option value="">All levels</option>
+                        <option value="INFO">INFO</option>
+                        <option value="WARN">WARN</option>
+                        <option value="ERROR">ERROR</option>
+                        <option value="DEBUG">DEBUG</option>
+                    </select>
+
+                    <select id="timeFilter">
+                        <option value="">All time</option>
+                        <option value="5m">5 minutes</option>
+                        <option value="1h">1 hour</option>
+                        <option value="24h">24 hours</option>
+                        <option value="7d">7 days</option>
+                    </select>
+
+                    <input type="text" id="searchInput" placeholder="Search...">
+
+                    <button class="btn btn-primary" id="refreshBtn">🔄 Refresh</button>
+                    <button class="btn btn-secondary" id="streamBtn">▶️ Live</button>
+                    <button class="btn btn-secondary" id="clearBtn">🗑️ Clear</button>
+
+                    <div class="log-status">
+                        <span class="stream-indicator" id="streamIndicator"></span>
+                        <span id="logStats" class="log-stats"></span>
+                    </div>
+                </div>
+
+                <div class="logs-container">
+                    <div class="logs-header">
+                        <span>unit: picoclaw</span>
+                        <span id="headerStats"></span>
+                    </div>
+
+                    <div class="logs-toolbar">
+                        <label for="linesInput">Lines:</label>
+                        <input type="number" id="linesInput" value="100" min="10" max="1000" step="10">
+                    </div>
+
+                    <div class="logs-content" id="logsContent">
+                        <div style="color: #7f8c8d; text-align: center; padding: 20px;">
+                            Click "Refresh" to load logs
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

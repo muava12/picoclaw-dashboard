@@ -35,6 +35,11 @@ class Dashboard {
                 if (tabName === 'files') {
                     window.fileExplorer.loadFiles();
                 }
+
+                // If logs tab, load logs
+                if (tabName === 'logs') {
+                    window.logsViewer.loadLogs();
+                }
             });
         });
     }
@@ -546,10 +551,12 @@ class FileExplorer {
 }
 
 // Initialize dashboard and file explorer when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
     window.dashboard = new Dashboard();
     window.fileExplorer = new FileExplorer();
+    window.logsViewer = new LogsViewer();
     window.fileExplorer.init();
+    window.logsViewer.init();
     window.dashboard.init();
 });
 
@@ -559,3 +566,189 @@ setInterval(() => {
         window.dashboard.fetchHealth();
     }
 }, 30000);
+
+// Logs Viewer
+class LogsViewer {
+    constructor() {
+        this.eventSource = null;
+        this.isStreaming = false;
+        this.logsContent = document.getElementById('logsContent');
+        this.refreshBtn = document.getElementById('refreshBtn');
+        this.streamBtn = document.getElementById('streamBtn');
+        this.clearBtn = document.getElementById('clearBtn');
+        this.levelFilter = document.getElementById('levelFilter');
+        this.timeFilter = document.getElementById('timeFilter');
+        this.searchInput = document.getElementById('searchInput');
+        this.linesInput = document.getElementById('linesInput');
+        this.streamIndicator = document.getElementById('streamIndicator');
+        this.logStats = document.getElementById('logStats');
+        this.headerStats = document.getElementById('headerStats');
+    }
+
+    init() {
+        // Event listeners
+        this.refreshBtn.addEventListener('click', () => this.loadLogs());
+        this.streamBtn.addEventListener('click', () => this.toggleStream());
+        this.clearBtn.addEventListener('click', () => this.clearLogs());
+
+        this.levelFilter.addEventListener('change', () => {
+            if (this.isStreaming) this.stopStream();
+            this.loadLogs();
+        });
+
+        this.timeFilter.addEventListener('change', () => this.loadLogs());
+
+        this.searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (this.isStreaming) this.stopStream();
+                this.loadLogs();
+            }
+        });
+    }
+
+    async loadLogs() {
+        const filters = {
+            lines: parseInt(this.linesInput.value) || 100,
+            level: this.levelFilter.value,
+            since: this.timeFilter.value,
+            search: this.searchInput.value
+        };
+
+        this.refreshBtn.disabled = true;
+        this.refreshBtn.textContent = '⏳ Loading...';
+
+        try {
+            const params = new URLSearchParams();
+            if (filters.level) params.set('level', filters.level);
+            if (filters.since) params.set('since', filters.since);
+            if (filters.search) params.set('search', filters.search);
+            params.set('lines', filters.lines.toString());
+
+            const response = await fetch(`/api/logs?${params}`);
+            if (!response.ok) {
+                throw new Error('Failed to load logs');
+            }
+
+            const data = await response.json();
+            this.renderLogs(data.entries);
+            this.logStats.textContent = `${data.total} entries`;
+            this.headerStats.textContent = `Total: ${data.total}`;
+        } catch (error) {
+            this.logsContent.innerHTML = `<div style="color: var(--danger); padding: 20px; text-align: center;">
+                ❌ Error: ${error.message}
+            </div>`;
+        } finally {
+            this.refreshBtn.disabled = false;
+            this.refreshBtn.textContent = '🔄 Refresh';
+        }
+    }
+
+    renderLogs(entries) {
+        if (!entries || entries.length === 0) {
+            this.logsContent.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No entries</div>';
+            return;
+        }
+
+        const html = entries.map(entry => `
+            <div class="log-entry ${this.getLogLevelClass(entry.level)}">
+                <span class="log-timestamp">${this.formatTimestamp(entry.timestamp)}</span>
+                <span class="log-level log-level-${entry.level.toLowerCase()}">${entry.level}</span>
+                <span class="log-message">${this.escapeHtml(entry.message)}</span>
+            </div>
+        `).join('');
+
+        this.logsContent.innerHTML = html;
+        this.logsContent.scrollTop = this.logsContent.scrollHeight;
+    }
+
+    appendLogEntry(entry) {
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry ${this.getLogLevelClass(entry.level)}`;
+        logEntry.innerHTML = `
+            <span class="log-timestamp">${this.formatTimestamp(entry.timestamp)}</span>
+            <span class="log-level log-level-${entry.level.toLowerCase()}">${entry.level}</span>
+            <span class="log-message">${this.escapeHtml(entry.message)}</span>
+        `;
+
+        this.logsContent.appendChild(logEntry);
+        this.logsContent.scrollTop = this.logsContent.scrollHeight;
+
+        // Update counter
+        const stats = this.logStats.textContent.match(/(\d+) entries/);
+        const count = stats ? parseInt(stats[1]) + 1 : 1;
+        this.logStats.textContent = `${count} entries`;
+    }
+
+    toggleStream() {
+        if (this.isStreaming) {
+            this.stopStream();
+        } else {
+            this.startStream();
+        }
+    }
+
+    startStream() {
+        const params = new URLSearchParams();
+        if (this.levelFilter.value) params.set('level', this.levelFilter.value);
+        if (this.searchInput.value) params.set('search', this.searchInput.value);
+
+        this.eventSource = new EventSource(`/api/logs/stream?${params}`);
+
+        this.eventSource.onmessage = (event) => {
+            try {
+                const entry = JSON.parse(event.data);
+                this.appendLogEntry(entry);
+            } catch (e) {
+                console.error('Error parsing SSE message:', e);
+            }
+        };
+
+        this.eventSource.onerror = () => {
+            this.stopStream();
+        };
+
+        this.isStreaming = true;
+        this.streamBtn.textContent = '⏹️ Stop';
+        this.streamBtn.classList.add('streaming');
+        this.streamIndicator.classList.add('active');
+        this.refreshBtn.disabled = true;
+    }
+
+    stopStream() {
+        if (this.eventSource) {
+            this.eventSource.close();
+            this.eventSource = null;
+        }
+        this.isStreaming = false;
+        this.streamBtn.textContent = '▶️ Live';
+        this.streamBtn.classList.remove('streaming');
+        this.streamIndicator.classList.remove('active');
+        this.refreshBtn.disabled = false;
+    }
+
+    clearLogs() {
+        if (this.isStreaming) this.stopStream();
+        this.logsContent.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No entries</div>';
+        this.logStats.textContent = '';
+    }
+
+    getLogLevelClass(level) {
+        if (!level) return '';
+        const levelLower = level.toLowerCase();
+        if (levelLower === 'error' || levelLower === 'fatal') return 'log-level-error';
+        if (levelLower === 'warn') return 'log-level-warn';
+        return '';
+    }
+
+    formatTimestamp(isoString) {
+        const date = new Date(isoString);
+        return date.toLocaleTimeString('en-US', { hour12: false }) + '.' +
+               String(date.getMilliseconds()).padStart(3, '0');
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
