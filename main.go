@@ -20,7 +20,7 @@ func main() {
 	go hub.Run()
 
 	// Setup logs service
-	api.InitLogsService("picoclaw-dashboard") // systemd unit name
+	api.InitLogsService("picoclaw") // systemd unit name
 
 	// Setup API routes
 	api.SetupRoutes(hub)
