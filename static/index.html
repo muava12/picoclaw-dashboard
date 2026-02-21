@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PicoClaw Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦞 PicoClaw Dashboard</h1>
+            <p class="subtitle">Server Management</p>
+        </header>
+
+        <div class="status" id="status">
+            <span class="status-indicator"></span>
+            <span class="status-text">Connecting...</span>
+        </div>
+
+        <div class="grid">
+            <!-- CPU Card -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">📊</span>
+                    <h3>CPU</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-value" id="cpu-value">--</div>
+                    <div class="metric-unit">%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="cpu-bar"></div>
+                    </div>
+                    <div class="metric-meta" id="cpu-meta">-- cores</div>
+                </div>
+            </div>
+
+            <!-- Memory Card -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">💾</span>
+                    <h3>Memory</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-value" id="mem-value">--</div>
+                    <div class="metric-unit">%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="mem-bar"></div>
+                    </div>
+                    <div class="metric-meta" id="mem-meta">-- / --</div>
+                </div>
+            </div>
+
+            <!-- Disk Card -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">💿</span>
+                    <h3>Disk</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-value" id="disk-value">--</div>
+                    <div class="metric-unit">%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="disk-bar"></div>
+                    </div>
+                    <div class="metric-meta" id="disk-meta">-- / --</div>
+                </div>
+            </div>
+
+            <!-- Uptime Card -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">⏱️</span>
+                    <h3>Uptime</h3>
+                </div>
+                <div class="card-body">
+                    <div class="metric-value" id="uptime-value">--</div>
+                    <div class="metric-unit">since</div>
+                    <div class="metric-meta" id="uptime-meta">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Runtime Info</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">OS</span>
+                    <span class="info-value" id="os-value">--</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Arch</span>
+                    <span class="info-value" id="arch-value">--</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Go</span>
+                    <span class="info-value" id="go-value">--</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Updated</span>
+                    <span class="info-value" id="updated-value">--</span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Built with ❤️ for PicoClaw</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
