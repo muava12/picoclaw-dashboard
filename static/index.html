@@ -91,25 +91,25 @@
                 </div>
             </div>
 
-            <div class="info-section">
-                <h3>Runtime Info</h3>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">OS</span>
-                        <span class="info-value" id="os-value">--</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Arch</span>
-                        <span class="info-value" id="arch-value">--</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Go</span>
-                        <span class="info-value" id="go-value">--</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Updated</span>
-                        <span class="info-value" id="updated-value">--</span>
-                    </div>
+            <div class="service-section">
+                <h3>Service Control</h3>
+                <div class="service-status" id="service-status">
+                    <span class="status-dot" id="service-dot"></span>
+                    <span class="status-text" id="service-text">Loading...</span>
+                </div>
+                <div class="service-buttons">
+                    <button class="btn btn-service" id="btn-start" data-action="start">
+                        <span class="btn-icon">▶️</span>
+                        <span>Start</span>
+                    </button>
+                    <button class="btn btn-service" id="btn-stop" data-action="stop">
+                        <span class="btn-icon">⏹️</span>
+                        <span>Stop</span>
+                    </button>
+                    <button class="btn btn-service" id="btn-restart" data-action="restart">
+                        <span class="btn-icon">🔄</span>
+                        <span>Restart</span>
+                    </button>
                 </div>
             </div>
         </div>

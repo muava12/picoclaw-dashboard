@@ -13,6 +13,7 @@ class Dashboard {
         this.initTabs();
         // Also fetch initial data via REST as fallback
         this.fetchHealth();
+        this.fetchServiceStatus();
     }
 
     initTabs() {
@@ -59,6 +60,7 @@ class Dashboard {
 
             // Request initial data
             this.fetchHealth();
+            this.fetchServiceStatus();
         };
 
         this.ws.onmessage = (event) => {
@@ -100,6 +102,18 @@ class Dashboard {
         }
     }
 
+    async fetchServiceStatus() {
+        try {
+            const response = await fetch('/api/service');
+            if (response.ok) {
+                const data = await response.json();
+                window.serviceControl.updateStatus(data);
+            }
+        } catch (e) {
+            console.error('Error fetching service status:', e);
+        }
+    }
+
     updateDashboard(data) {
         // Update CPU
         this.updateMetric('cpu', data.cpu.usage_percent, `${data.cpu.cores} cores`);
@@ -115,14 +129,9 @@ class Dashboard {
         document.getElementById('uptime-value').textContent = uptime;
         document.getElementById('uptime-meta').textContent = this.formatDateTime(data.uptime.boot_time);
 
-        // Update Runtime Info
-        document.getElementById('os-value').textContent = data.runtime.os;
-        document.getElementById('arch-value').textContent = data.runtime.arch;
-        document.getElementById('go-value').textContent = data.runtime.go_version;
-
         // Update timestamp
         const updated = new Date(data.cpu.timestamp || Date.now());
-        document.getElementById('updated-value').textContent = this.formatTime(updated);
+        document.getElementById('updated-value')?.remove(); // Runtime Info removed
     }
 
     updateMetric(type, value, meta) {
@@ -175,8 +184,107 @@ class Dashboard {
     }
 }
 
-// File Explorer
-class FileExplorer {
+// Service Control
+class ServiceControl {
+    constructor() {
+        this.statusDot = document.getElementById('service-dot');
+        this.statusText = document.getElementById('service-text');
+        this.buttons = {
+            start: document.getElementById('btn-start'),
+            stop: document.getElementById('btn-stop'),
+            restart: document.getElementById('btn-restart'),
+        };
+        this.currentStatus = null;
+    }
+
+    init() {
+        // Button events
+        Object.entries(this.buttons).forEach(([action, button]) => {
+            button.addEventListener('click', () => this.executeAction(action));
+        });
+
+        // Initial load
+        this.fetchStatus();
+    }
+
+    async fetchStatus() {
+        try {
+            const response = await fetch('/api/service');
+            if (response.ok) {
+                const data = await response.json();
+                this.updateStatus(data);
+            }
+        } catch (e) {
+            console.error('Error fetching service status:', e);
+        }
+    }
+
+    updateStatus(status) {
+        this.currentStatus = status;
+
+        // Update status text and dot
+        this.statusText.textContent = status.status;
+        this.statusDot.className = 'status-dot';
+        if (status.active && status.running) {
+            this.statusDot.classList.add('active');
+        } else {
+            this.statusDot.classList.add('inactive');
+        }
+
+        // Update buttons based on status
+        this.updateButtons();
+    }
+
+    updateButtons() {
+        const isRunning = this.currentStatus?.active && this.currentStatus?.running;
+
+        // Start: disabled if running
+        this.buttons.start.disabled = isRunning;
+
+        // Stop: disabled if not running
+        this.buttons.stop.disabled = !isRunning;
+
+        // Restart: always enabled
+        this.buttons.restart.disabled = false;
+    }
+
+    async executeAction(action) {
+        const button = this.buttons[action];
+        const originalText = button.innerHTML;
+
+        // Show loading state
+        button.disabled = true;
+        button.innerHTML = '<span class="btn-icon">⏳</span><span>...</span>';
+
+        try {
+            const response = await fetch('/api/service/action', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Action failed');
+            }
+
+            // Update status with response
+            const data = await response.json();
+            this.updateStatus(data);
+        } catch (e) {
+            console.error(`Error executing ${action}:`, e);
+            alert(`Failed to ${action} service: ${e.message}`);
+
+            // Revert button
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
+}
+
+// Initialize dashboard and file explorer when DOM is ready
     constructor() {
         this.currentPath = '';
         this.filesListEl = document.getElementById('files-list');
@@ -551,12 +659,14 @@ class FileExplorer {
 }
 
 // Initialize dashboard and file explorer when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     window.dashboard = new Dashboard();
     window.fileExplorer = new FileExplorer();
     window.logsViewer = new LogsViewer();
+    window.serviceControl = new ServiceControl();
     window.fileExplorer.init();
     window.logsViewer.init();
+    window.serviceControl.init();
     window.dashboard.init();
 });
 

@@ -24,7 +24,8 @@ func main() {
 
 	// Setup API routes
 	api.SetupRoutes(hub)
-	api.SetupLogRoutes() // Log routes
+	api.SetupLogRoutes()    // Log routes
+	api.SetupServiceRoutes() // Service control routes
 
 	// Broadcast metrics every 5 seconds
 	go func() {
