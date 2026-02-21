@@ -40,19 +40,15 @@ func NewHub() *Hub {
 }
 
 func (h *Hub) Run() {
-	log.Println("🔌 WebSocket hub started")
-
 	for {
 		select {
 		case client := <-h.register:
 			h.clients[client] = true
-			log.Printf("✅ Client connected: %d active", len(h.clients))
 
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
-				log.Printf("❌ Client disconnected: %d active", len(h.clients))
 			}
 
 		case message := <-h.broadcast:
@@ -80,10 +76,6 @@ func (h *Hub) Broadcast(message interface{}) {
 	default:
 		log.Println("⚠️  Broadcast channel full, dropping message")
 	}
-}
-
-func (h *Hub) ClientCount() int {
-	return len(h.clients)
 }
 
 func HandleWebSocket(hub *Hub, w http.ResponseWriter, r *http.Request) {

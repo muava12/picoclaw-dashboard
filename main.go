@@ -28,15 +28,12 @@ func main() {
 		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()
 		for range ticker.C {
-			log.Printf("🔄 Fetching health metrics...")
 			health, err := api.GetHealth()
 			if err != nil {
 				log.Printf("⚠️  Error getting health: %v", err)
 				continue
 			}
-			log.Printf("📡 Broadcasting metrics: %+v", health)
 			hub.Broadcast(health)
-			log.Printf("✅ Metrics sent to %d clients", hub.ClientCount())
 		}
 	}()
 
@@ -47,12 +44,8 @@ func main() {
 	port := "8080"
 	addr := fmt.Sprintf(":%s", port)
 
-	log.Printf("🚀 PicoClaw Dashboard starting...")
-	log.Printf("📊 Server metrics: %s/api/health", addr)
-	log.Printf("🔌 WebSocket: %s/ws", addr)
-	log.Printf("💻 Runtime: %s/%s", runtime.GOOS, runtime.GOARCH)
-	log.Printf("🌐 Tailscale enabled - connecting from VPN")
-	log.Printf("📡 Broadcasting metrics every 5 seconds")
+	log.Printf("🚀 PicoClaw Dashboard starting on %s", addr)
+	log.Printf("📊 Metrics: %s/api/health | 🔌 WebSocket: %s/ws", addr, addr)
 
 	server := &http.Server{
 		Addr:         addr,

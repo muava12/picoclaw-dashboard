@@ -143,6 +143,4 @@ func SetupRoutes(hub *websocket.Hub) {
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		websocket.HandleWebSocket(hub, w, r)
 	})
-
-	log.Println("📡 API routes registered: /api/health, /ws")
 }
