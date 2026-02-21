@@ -2,6 +2,7 @@ package api
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/waplay/picoclaw-dashboard/pkg/logs"
 )
