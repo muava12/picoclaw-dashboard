@@ -135,6 +135,11 @@ func (h *Handler) streamLogs(w http.ResponseWriter, r *http.Request) {
 
 	// Функция для отправки события
 	sendEvent := func(entry LogEntry) {
+		select {
+		case <-ctx.Done():
+			return // Контекст отменен, не пишем
+		default:
+		}
 		data, _ := json.Marshal(entry)
 		fmt.Fprintf(w, "data: %s\n\n", data)
 		flusher.Flush()
@@ -153,12 +158,18 @@ func (h *Handler) streamLogs(w http.ResponseWriter, r *http.Request) {
 			sendEvent(entry)
 		})
 
+		// Отправляем ошибку только если соединение еще открыто
 		if err != nil {
-			sendEvent(LogEntry{
-				Timestamp: time.Now(),
-				Level:     "ERROR",
-				Message:   "Log stream error: " + err.Error(),
-			})
+			select {
+			case <-ctx.Done():
+				// Соединение закрыто, не пишем
+			default:
+				sendEvent(LogEntry{
+					Timestamp: time.Now(),
+					Level:     "ERROR",
+					Message:   "Log stream error: " + err.Error(),
+				})
+			}
 		}
 	}()
 
