@@ -125,7 +125,7 @@ func SetupRoutes(hub *websocket.Hub) {
 	http.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		health, err := getHealth()
+		health, err := GetHealth()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
