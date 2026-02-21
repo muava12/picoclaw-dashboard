@@ -2,6 +2,18 @@
 
 A lightweight, single-binary Go application that provides a beautiful web interface for monitoring and managing your PicoClaw server. Designed for use with Tailscale VPN for secure, authentication-free access from any device.
 
+## Screenshots
+
+### Desktop View
+
+<img src="assets/desktop.png" alt="PicoClaw Dashboard Desktop" width="800">
+
+### Mobile Views
+
+| | |
+|:---:|:---:|
+| <img src="assets/mobile-1.jpg" alt="Mobile View 1" width="200"> | <img src="assets/mobile-2.jpg" alt="Mobile View 2" width="200"> <img src="assets/mobile-3.jpg" alt="Mobile View 3" width="200"> |
+
 ## Features
 
 - 📊 **Real-time Server Metrics**
