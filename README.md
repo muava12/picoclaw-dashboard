@@ -2,6 +2,8 @@
 
 > Web dashboard for PicoClaw server management with real-time monitoring
 
+> **⚠️ Work in Progress** — This project is currently under active development. Features and APIs may change. Feel free to test it, but expect some rough edges!
+
 A lightweight, single-binary Go application that provides a beautiful web interface for monitoring and managing your PicoClaw server. Designed for use with Tailscale VPN for secure, authentication-free access from any device.
 
 ## Features
@@ -207,7 +209,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## About PicoClaw
 
-[PicoClaw](https://github.com/sipeed/picoclaw) is an ultra-lightweight personal AI assistant written in Go.
+[picoclaw](https://github.com/sipeed/picoclaw) is an ultra-lightweight personal AI assistant written in Go.
 
 ---
 
