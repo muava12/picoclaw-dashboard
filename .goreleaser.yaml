@@ -2,6 +2,7 @@ version: 2
 
 project_name: picoclaw-dashboard
 
+# Disable standard semver requirements for 'fork-X' tags
 builds:
   - id: picoclaw-dashboard
     binary: picoclaw-dashboard
